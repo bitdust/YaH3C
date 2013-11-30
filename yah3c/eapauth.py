@@ -38,7 +38,7 @@ class EAPAuth:
         self.ethernet_header = get_ethernet_header(self.mac_addr, PAE_GROUP_ADDR, ETHERTYPE_PAE)
         self.has_sent_logoff = False
         self.login_info = login_info
-        self.version_info = '\x06\x07bjQ7SE8BZ3MqHhs3clMregcDY3Y=\x20\x20'
+        self.version_info = '\x06\x07PTVeT0hXYiZ/GUgwcwUsLwGQRWo=\x20\x20'
 
     def send_start(self):
         # sent eapol start packet
