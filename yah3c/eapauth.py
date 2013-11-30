@@ -10,6 +10,7 @@ __all__ = ["EAPAuth"]
 import socket
 import os, sys, pwd
 from subprocess import call
+from hashlib import md5
 
 from colorama import Fore, Style, init
 # init() # required in Windows
@@ -63,12 +64,8 @@ class EAPAuth:
                         self.version_info + self.login_info['username'])))
 
     def send_response_md5(self, packet_id, md5data):
-        md5 = self.login_info['password'][0:16]
-        if len(md5) < 16:
-            md5 = md5 + '\x00' * (16 - len (md5))
-        chap = []
-        for i in xrange(0, 16):
-            chap.append(chr(ord(md5[i]) ^ ord(md5data[i])))
+        pwd = self.login_info['password']
+        chap = md5('\x02'+pwd+md5data).digest()
         resp = chr(len(chap)) + ''.join(chap) + self.login_info['username']
         eap_packet = self.ethernet_header + get_EAPOL(EAPOL_EAPPACKET, get_EAP(EAP_RESPONSE, packet_id, EAP_TYPE_MD5, resp))
         try:
