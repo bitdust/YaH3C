@@ -11,10 +11,36 @@ import socket
 import os, sys, pwd
 from subprocess import call
 from hashlib import md5
+import base64
+from random import randint 
+H3C_KEY = 'Oly5D62FaE94W7'
 
 from colorama import Fore, Style, init
 # init() # required in Windows
 from eappacket import *
+
+def XOR(txt,key):
+    result =range(0,len(txt)) 
+    new_key = key+key
+    new_key = new_key[:len(txt)]
+    new_key_r = new_key[::-1]
+    for i in range(0,len(txt)):
+        result[i] = new_key[i] ^ new_key_r[i] ^ txt[i]
+    return result
+    
+def VerEncode(ver):
+    print u'\n====Base64序列生成===='
+    random_key = [randint(0,0xFF),randint(0,0xFF),randint(0,0xFF),randint(0,0xFF)]
+    random_key_str = "%02x%02x%02x%02x" %(random_key[0],random_key[1],random_key[2],random_key[3])
+    print u'随机KEY值'
+    print random_key_str
+    tmp = XOR(map(ord,ver),map(ord,random_key_str))
+    tmp = tmp + random_key
+    result = XOR(tmp,map(ord,H3C_KEY))
+    result = ''.join(map(chr,result))
+    result =  base64.b64encode(result)
+    print result
+    return result
 
 def display_prompt(color, string):
     prompt = color + Style.BRIGHT + '==> ' + Style.RESET_ALL
@@ -38,7 +64,7 @@ class EAPAuth:
         self.ethernet_header = get_ethernet_header(self.mac_addr, PAE_GROUP_ADDR, ETHERTYPE_PAE)
         self.has_sent_logoff = False
         self.login_info = login_info
-        self.version_info = '\x06\x07PTVeT0hXYiZ/GUgwcwUsLwGQRWo=\x20\x20'
+        self.version_info = '\x06\x07'+VerEncode('CH\x12V5.20-0407\x00\x00\x00')+'\x20\x20'
 
     def send_start(self):
         # sent eapol start packet
