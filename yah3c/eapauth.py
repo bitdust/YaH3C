@@ -64,6 +64,7 @@ class EAPAuth:
         self.mac_addr = self.client.getsockname()[4]
         self.ethernet_header = get_ethernet_header(self.mac_addr, PAE_GROUP_ADDR, ETHERTYPE_PAE)
         self.has_sent_logoff = False
+        self.is_first_response = True
         self.login_info = login_info
         self.version_info = '\x06\x07'+VerEncode('CH\x12V5.20-0407\x00\x00\x00')+'\x20\x20'
 
@@ -155,8 +156,9 @@ class EAPAuth:
             reqdata = eap_packet[9:4 + eap_len]
             if reqtype == EAP_TYPE_ID:
                 display_prompt(Fore.YELLOW, 'Got EAP Request for identity')
-                self.send_response_id(id)
-                display_prompt(Fore.GREEN, 'Sending EAP response with identity = [%s]' % self.login_info['username'])
+                if self.is_first_response:
+                    self.send_response_id(id)
+                    display_prompt(Fore.GREEN, 'Sending EAP response with identity = [%s]' % self.login_info['username'])
             elif reqtype == EAP_TYPE_H3C:
                 display_prompt(Fore.YELLOW, 'Got EAP Request for Allocation')
                 self.send_response_h3c(id)
